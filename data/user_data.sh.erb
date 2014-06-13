@@ -41,8 +41,19 @@ EOF
 
 chmod 755 $imagedir/usr/sbin/policy-rc.d
 
+# Chroot needs the lock dir for aptitude
+mkdir -p $imagedir/run/lock
+
 chroot $imagedir apt-get update
 chroot $imagedir apt-get dist-upgrade -y
+
+# ensure ubuntu user is available and sudo-capable in chroot env...
+cp /etc/passwd $imagedir/etc/passwd
+cp /etc/group $imagedir/etc/group
+cp /etc/sudoers.d/90-cloud-init-users $imagedir/etc/sudoers.d/90-cloud-init-users
+mkdir -p $imagedir/home/ubuntu
+chmod 755 $imagedir/home/ubuntu
+chown ubuntu:ubuntu $imagedir/home/ubuntu
 
 # RUN CUSTOM USER SCRIPT
 cat << 'CUSTOM_SCRIPT_EOF' > $imagedir/tmp/custom_user_script
@@ -50,7 +61,8 @@ cat << 'CUSTOM_SCRIPT_EOF' > $imagedir/tmp/custom_user_script
 CUSTOM_SCRIPT_EOF
 
 chmod +x $imagedir/tmp/custom_user_script
-chroot $imagedir /tmp/custom_user_script
+#chroot $imagedir /usr/bin/sudo -u ubuntu /bin/bash -c /tmp/custom_user_script
+chroot $imagedir /bin/bash -c /tmp/custom_user_script
 # END CUSTOM USER SCRIPT
 
 # Put resolv.conf symlink back in place
