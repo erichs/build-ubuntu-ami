@@ -27,8 +27,10 @@ For convenience, this script does not need an AWS EC2 private key & cert for cre
 
 ## Basic Usage
 
-if you have not registered an SSH keypair named 'default' with AWS, you will need to supply a `-k` argument.
-
+### Notes:
+ * if you have not registered an SSH keypair named 'default' with AWS, you will need to supply a `-k` argument.
+ * this script does not support second-generation, m3-* flavors, which do not have large ephemeral storage.
+ 
 See [examples](https://github.com/kickstarter/build-ubuntu-ami/tree/master/examples) of custom build scripts.
 
     # Create a custom AMI from my_script.sh
