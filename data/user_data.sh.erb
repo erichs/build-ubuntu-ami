@@ -45,11 +45,14 @@ chmod 755 $imagedir/usr/sbin/policy-rc.d
 mkdir -p $imagedir/run/lock
 
 chroot $imagedir apt-get update
+
+set +e   # Turn off auto-fail on error
 # Do a double-take with force install in case there are any unconfigured dependencies which would cause the script to fail...
+chroot $imagedir apt-get dist-upgrade -y
 chroot $imagedir apt-get install -f
 chroot $imagedir apt-get clean
 chroot $imagedir apt-get update
-chroot $imagedir apt-get dist-upgrade -y
+set -e  # Resume auto-fail on error
 
 # ensure ubuntu user is available and sudo-capable in chroot env...
 cp /etc/passwd $imagedir/etc/passwd
