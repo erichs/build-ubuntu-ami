@@ -94,6 +94,13 @@ class BuildUbuntuAmi
     @fog ||= Fog::Compute.new(:provider => 'AWS', :region => region)
   end
 
+  # return time of launch as AWS-taggable UTC string
+  def time_of_launch
+    t = Time.now.utc.to_s
+    invalid_chars = Regexp.new([':','-',' '].join('|'))
+    t.gsub(invalid_chars, '')
+  end
+
   def launch_server!
     puts "Launching server..."
     self.server = fog.servers.create({
@@ -101,7 +108,8 @@ class BuildUbuntuAmi
       :image_id => canonical_ami,
       :groups => [group],
       :key_name => key_name,
-      :user_data => user_data
+      :user_data => user_data,
+      :tags => { Name: "build_ubuntu_ami_" + time_of_launch }
     })
     server.wait_for { ready? }
     puts "Launched #{server.id}; #{server.dns_name}; waiting for it to be available."
